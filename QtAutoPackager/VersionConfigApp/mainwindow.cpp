@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QDomDocument>
 #include <QFile>
+#include <QDir>
 #include <QMessageBox>
 #include <QDate>
 
@@ -19,6 +20,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+QDomElement MainWindow::createElement(QDomDocument& doc, const QString& tag, const QString& value) {
+    QDomElement element = doc.createElement(tag);
+    element.appendChild(doc.createTextNode(value));
+    return element;
+}
+
 void MainWindow::saveVersionToXml() {
     QString version = ui->versionInput->text();
 
@@ -27,16 +34,53 @@ void MainWindow::saveVersionToXml() {
         return;
     }
 
-    if (!createConfigXml(version) || !createPackageXml(version) || !createLicenseFile()) {
+    QString baseDir = QString("D:/qt/rockpaperscissors-installer/v%1").arg(version);  // 최상위 디렉터리 경로
+
+    if (!createDirectoryStructure(baseDir)) {
+        ui->resultLabel->setText("Failed to create directory structure.");
+        return;
+    }
+
+    if (!createConfigXml(version, baseDir) || !createPackageXml(version, baseDir) || !createLicenseFile(baseDir)) {
         ui->resultLabel->setText("Failed to create XML or license files.");
         return;
     }
 
-    ui->resultLabel->setText("config.xml, package.xml, and license.txt have been created successfully!");
+    ui->resultLabel->setText("Directory structure and XML files have been created successfully!");
 }
 
-// config.xml 생성 함수
-bool MainWindow::createConfigXml(const QString& version) {
+// 디렉터리 구조 생성 함수
+bool MainWindow::createDirectoryStructure(const QString& baseDir) {
+    QDir dir;
+
+    // 최상위 디렉터리와 하위 디렉터리들 생성
+    QStringList paths = {
+        baseDir + "/config",
+        baseDir + "/packages",
+        baseDir + "/packages/com.mycompany.rockpaperscissors/meta",
+        baseDir + "/packages/com.mycompany.rockpaperscissors/data",
+        baseDir + "/repository"
+    };
+
+    for (const QString& path : paths) {
+        if (!dir.mkpath(path)) {
+            QMessageBox::warning(this, "Error", QString("Failed to create directory: %1").arg(path));
+            return false;
+        }
+        // 빈 디렉터리에 __init__.py 파일 생성
+        QFile initFile(path + "/__init__.py");
+        if (!initFile.open(QIODevice::WriteOnly)) {
+            QMessageBox::warning(this, "Error", QString("Failed to create __init__.py in: %1").arg(path));
+            return false;
+        }
+        initFile.close();
+    }
+
+    return true;
+}
+
+// config.xml 생성 함수 (경로 변경됨)
+bool MainWindow::createConfigXml(const QString& version, const QString& baseDir) {
     QDomDocument doc;
     QDomElement root = doc.createElement("Installer");
     doc.appendChild(root);
@@ -56,7 +100,6 @@ bool MainWindow::createConfigXml(const QString& version) {
     root.appendChild(createElement(doc, "TargetDir", QString("@DesktopDir@/RockPaperScissors_v.%1").arg(version)));
     root.appendChild(createElement(doc, "AdminTargetDir", "@RootDir@/RockPaperScissors"));
 
-    // RemoteRepositories 추가
     QDomElement repositories = doc.createElement("RemoteRepositories");
     QDomElement repository = doc.createElement("Repository");
     repository.appendChild(createElement(doc, "Url", QString("https://jungjinhyo.github.io/rockpaperscissors-installer/v%1").arg(version)));
@@ -65,11 +108,11 @@ bool MainWindow::createConfigXml(const QString& version) {
     repositories.appendChild(repository);
     root.appendChild(repositories);
 
-    return saveXmlToFile(doc, "D:/qt3/config.xml");
+    return saveXmlToFile(doc, baseDir + "/config/config.xml");
 }
 
-// package.xml 생성 함수
-bool MainWindow::createPackageXml(const QString& version) {
+// package.xml 생성 함수 (경로 변경됨)
+bool MainWindow::createPackageXml(const QString& version, const QString& baseDir) {
     QDomDocument doc;
     QDomElement root = doc.createElement("Package");
     doc.appendChild(root);
@@ -80,7 +123,6 @@ bool MainWindow::createPackageXml(const QString& version) {
     root.appendChild(createElement(doc, "ReleaseDate", QDate::currentDate().toString("yyyy-MM-dd")));
     root.appendChild(createElement(doc, "Name", "com.mycompany.rockpaperscissors"));
 
-    // Licenses 추가
     QDomElement licenses = doc.createElement("Licenses");
     QDomElement license = doc.createElement("License");
     license.setAttribute("name", "License Agreement");
@@ -94,33 +136,12 @@ bool MainWindow::createPackageXml(const QString& version) {
     root.appendChild(createElement(doc, "ForcedInstallation", "false"));
     root.appendChild(createElement(doc, "ForcedUpdate", "false"));
 
-    return saveXmlToFile(doc, "D:/qt3/package.xml");
+    return saveXmlToFile(doc, baseDir + "/packages/com.mycompany.rockpaperscissors/meta/package.xml");
 }
 
-// XML 요소 생성 함수
-QDomElement MainWindow::createElement(QDomDocument& doc, const QString& tag, const QString& value) {
-    QDomElement element = doc.createElement(tag);
-    element.appendChild(doc.createTextNode(value));
-    return element;
-}
-
-// XML 파일 저장 함수
-bool MainWindow::saveXmlToFile(const QDomDocument& doc, const QString& filePath) {
-    QFile file(filePath);
-    if (!file.open(QIODevice::WriteOnly)) {
-        QMessageBox::warning(this, "Error", QString("Failed to create %1").arg(filePath));
-        return false;
-    }
-
-    QTextStream stream(&file);
-    stream << doc.toString();
-    file.close();
-    return true;
-}
-
-// license.txt 파일 생성 함수
-bool MainWindow::createLicenseFile() {
-    QFile file("D:/qt3/license.txt");
+// license.txt 파일 생성 함수 (경로 변경됨)
+bool MainWindow::createLicenseFile(const QString& baseDir) {
+    QFile file(baseDir + "/packages/com.mycompany.rockpaperscissors/meta/license.txt");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::warning(this, "Error", "Failed to create license.txt");
         return false;
@@ -140,6 +161,19 @@ bool MainWindow::createLicenseFile() {
     out << "MIT 라이선스와 유사하게, 이 소프트웨어는 자유롭게 사용되고 배포될 수 있지만, 사용에 따른 책임은 사용자에게 있습니다.\n\n";
     out << "발행일: 2024년 10월 31일\n";
 
+    file.close();
+    return true;
+}
+
+bool MainWindow::saveXmlToFile(const QDomDocument& doc, const QString& filePath) {
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::warning(this, "Error", QString("Failed to create %1").arg(filePath));
+        return false;
+    }
+
+    QTextStream stream(&file);
+    stream << doc.toString();
     file.close();
     return true;
 }
