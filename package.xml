@@ -1,0 +1,15 @@
+<Package>
+ <DisplayName>Rock Paper Scissors Game (v1.1.2)</DisplayName>
+ <Description>A simple Rock Paper Scissors game.</Description>
+ <Version>1.1.2</Version>
+ <ReleaseDate>2024-10-31</ReleaseDate>
+ <Name>com.mycompany.rockpaperscissors</Name>
+ <Licenses>
+  <License file="license.txt" name="License Agreement"/>
+ </Licenses>
+ <DownloadableArchives>RockPaperScissors_v1.1.2.7z</DownloadableArchives>
+ <UpdateText>This release includes bug fixes and new features.</UpdateText>
+ <Default>true</Default>
+ <ForcedInstallation>false</ForcedInstallation>
+ <ForcedUpdate>false</ForcedUpdate>
+</Package>

@@ -1,0 +1,23 @@
+<Installer>
+ <Name>Rock Paper Scissors</Name>
+ <Version>1.1.2</Version>
+ <Title>Rock Paper Scissors Game Installer</Title>
+ <Publisher>MyCompany</Publisher>
+ <ProductUrl>https://jungjinhyo.github.io/rockpaperscissors-installer/</ProductUrl>
+ <InstallerWindowIcon>installericon.png</InstallerWindowIcon>
+ <InstallerApplicationIcon>installericon.png</InstallerApplicationIcon>
+ <Logo>logo.png</Logo>
+ <Watermark>watermark.png</Watermark>
+ <RunProgram>@TargetDir@/RockPaperScissors.exe</RunProgram>
+ <RunProgramDescription>Play the latest version of Rock Paper Scissors!</RunProgramDescription>
+ <StartMenuDir>RockPaperScissors</StartMenuDir>
+ <TargetDir>@DesktopDir@/RockPaperScissors_v.1.1.2</TargetDir>
+ <AdminTargetDir>@RootDir@/RockPaperScissors</AdminTargetDir>
+ <RemoteRepositories>
+  <Repository>
+   <Url>https://jungjinhyo.github.io/rockpaperscissors-installer/v1.1.2</Url>
+   <Enabled>1</Enabled>
+   <DisplayName>Rock Paper Scissors v1.1.2 Repository</DisplayName>
+  </Repository>
+ </RemoteRepositories>
+</Installer>
