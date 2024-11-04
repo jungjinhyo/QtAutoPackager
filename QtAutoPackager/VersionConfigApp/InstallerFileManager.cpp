@@ -177,7 +177,6 @@ bool InstallerFileManager::compressFileToZip(const QString& folderPath) {
 
     process.waitForFinished();
 
-    QString output = process.readAllStandardOutput();
     QString errorOutput = process.readAllStandardError();
 
     if (process.exitCode() != 0) {
@@ -185,7 +184,7 @@ bool InstallerFileManager::compressFileToZip(const QString& folderPath) {
         return false;
     }
 
-    QMessageBox::information(nullptr, "Success", "Folder compressed successfully to " + tempArchivePath + "\n\nOutput:\n" + output);
+    QMessageBox::information(nullptr, "Success", "Folder compressed successfully to " + tempArchivePath);
     return true;
 }
 

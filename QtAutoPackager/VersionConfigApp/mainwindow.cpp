@@ -11,12 +11,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);  // UI 설정
 
-    // Save 버튼 클릭 시 saveVersionToXml 함수 호출 연결
-    connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveVersionToXml);
+    // Save 버튼 클릭 시 compressSelectedFile 함수 호출 연결 compressSelectedFile, saveVersionToXml 함수 호출 연결
+    connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::handleSaveButtonClick);
+
     // 파일 선택 버튼 클릭 시 selectFile 함수 호출 연결
     connect(ui->selectFileButton, &QPushButton::clicked, this, &MainWindow::selectFile);
-    // 압축 버튼 클릭 시 compressSelectedFile 함수 호출 연결
-    connect(ui->compressButton, &QPushButton::clicked, this, &MainWindow::compressSelectedFile);
 
     // 프로그램 이름 또는 버전이 변경될 때 설치 경로를 업데이트
     connect(ui->programNameInput, &QLineEdit::textChanged, this, &MainWindow::updateInstallPath);
@@ -29,6 +28,13 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::handleSaveButtonClick() {
+    // 압축 함수 호출
+    compressSelectedFile();
+    // XML 저장 함수 호출
+    saveVersionToXml();
 }
 
 // 프로그램 이름이나 버전이 변경될 때 설치 경로를 자동으로 업데이트하는 함수
@@ -60,12 +66,6 @@ void MainWindow::saveVersionToXml() {
         return;
     }
 
-    // 압축 수행
-    if (!fileManager->compressFileToZip(selectedFilePath)) {
-        ui->resultLabel->setText("Compression failed.");
-        return;
-    }
-
     // 압축 파일을 data 경로로 이동하고 임시 파일 삭제
     QString tempArchivePath = QCoreApplication::applicationDirPath() + "/" + QFileInfo(selectedFilePath).fileName() + ".zip";
     QString finalArchivePath = installPath + "/packages/com.mycompany." + programName.toLower().replace(" ", "") + "/data/" + QFileInfo(selectedFilePath).fileName() + ".zip";
@@ -84,9 +84,9 @@ void MainWindow::selectFile() {
     // 폴더 선택 대화 상자 열기
     selectedFilePath = QFileDialog::getExistingDirectory(this, "Select Folder to Compress");
 
-    // 선택한 폴더 경로를 UI에 표시
+    // 선택한 폴더 경로를 UI(select realese directory)에 표시
     if (!selectedFilePath.isEmpty()) {
-        ui->filePathLabel->setText("Selected Folder: " + selectedFilePath);
+        ui->filePathLabel->setText(selectedFilePath);
     }
 }
 
