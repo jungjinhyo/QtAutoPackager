@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "installerfilemanager.h"
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QProcess>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -10,6 +13,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Save 버튼 클릭 시 saveVersionToXml 함수 호출 연결
     connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveVersionToXml);
+    // 파일 선택 버튼 클릭 시 selectFile 함수 호출 연결
+    connect(ui->selectFileButton, &QPushButton::clicked, this, &MainWindow::selectFile);
+    // 압축 버튼 클릭 시 compressSelectedFile 함수 호출 연결
+    connect(ui->compressButton, &QPushButton::clicked, this, &MainWindow::compressSelectedFile);
+
     // 프로그램 이름 또는 버전이 변경될 때 설치 경로를 업데이트
     connect(ui->programNameInput, &QLineEdit::textChanged, this, &MainWindow::updateInstallPath);
     connect(ui->versionInput, &QLineEdit::textChanged, this, &MainWindow::updateInstallPath);
@@ -38,24 +46,63 @@ void MainWindow::updateInstallPath() {
 
 // Save 버튼 클릭 시 XML 파일과 디렉터리 구조를 생성하는 함수
 void MainWindow::saveVersionToXml() {
-    // 프로그램 이름, 버전, 설치 경로를 UI에서 가져옴
     QString programName = ui->programNameInput->text();
     QString version = ui->versionInput->text();
     QString installPath = ui->installPathInput->text();
 
-    // InstallerFileManager 객체 생성
-    InstallerFileManager fileManager(programName, version, installPath);
+    fileManager = new InstallerFileManager(programName, version, installPath);
 
-    // 디렉터리 구조 및 XML 파일 생성
-    if (!fileManager.createDirectoryStructure() ||
-        !fileManager.createConfigXml() ||
-        !fileManager.createPackageXml() ||
-        !fileManager.createLicenseFile()) {
-        // 실패 시 에러 메시지 표시
+    if (!fileManager->createDirectoryStructure() ||
+        !fileManager->createConfigXml() ||
+        !fileManager->createPackageXml() ||
+        !fileManager->createLicenseFile()) {
         ui->resultLabel->setText("Failed to create files or directory structure.");
         return;
     }
 
-    // 성공 시 완료 메시지 표시
-    ui->resultLabel->setText("Files and directory structure created successfully!");
+    // 압축 수행
+    if (!fileManager->compressFileToZip(selectedFilePath)) {
+        ui->resultLabel->setText("Compression failed.");
+        return;
+    }
+
+    // 압축 파일을 data 경로로 이동하고 임시 파일 삭제
+    QString tempArchivePath = QCoreApplication::applicationDirPath() + "/" + QFileInfo(selectedFilePath).fileName() + ".zip";
+    QString finalArchivePath = installPath + "/packages/com.mycompany." + programName.toLower().replace(" ", "") + "/data/" + QFileInfo(selectedFilePath).fileName() + ".zip";
+
+    if (QFile::exists(finalArchivePath)) {
+        QFile::remove(finalArchivePath); // 기존 파일 삭제
+    }
+
+    QFile::rename(tempArchivePath, finalArchivePath); // 임시 파일 이동
+
+    ui->resultLabel->setText("Files and directory structure created and compressed file moved successfully!");
 }
+
+// 파일 선택 버튼 클릭 시 폴더를 선택하는 함수
+void MainWindow::selectFile() {
+    // 폴더 선택 대화 상자 열기
+    selectedFilePath = QFileDialog::getExistingDirectory(this, "Select Folder to Compress");
+
+    // 선택한 폴더 경로를 UI에 표시
+    if (!selectedFilePath.isEmpty()) {
+        ui->filePathLabel->setText("Selected Folder: " + selectedFilePath);
+    }
+}
+
+// 압축 버튼 클릭 시 선택한 폴더 전체를 7z 형식으로 압축하는 함수
+void MainWindow::compressSelectedFile() {
+    if (selectedFilePath.isEmpty()) {
+        QMessageBox::warning(this, "Error", "No folder selected for compression.");
+        return;
+    }
+
+    // 폴더 압축 수행
+    if (fileManager && fileManager->compressFileToZip(selectedFilePath)) {
+        ui->resultLabel->setText("Folder compressed successfully!");
+    } else {
+        ui->resultLabel->setText("Folder compression failed.");
+    }
+}
+
+

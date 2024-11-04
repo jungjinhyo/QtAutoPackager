@@ -51,7 +51,7 @@
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>270</y>
+      <y>360</y>
       <width>551</width>
       <height>151</height>
      </rect>
@@ -142,6 +142,55 @@
     </property>
     <property name="text">
      <string>InstallPath</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="selectFileButton">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>250</y>
+      <width>101</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>SelectFile</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="compressButton">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>250</y>
+      <width>191</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>CompressSelectedFile</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="filePathLabel">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>300</y>
+      <width>551</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>filePath</string>
     </property>
    </widget>
   </widget>

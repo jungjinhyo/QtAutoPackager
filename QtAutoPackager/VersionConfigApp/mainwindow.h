@@ -2,7 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "installerfilemanager.h"  // InstallerFileManager 클래스 포함
+#include "installerfilemanager.h"
+#include "ui_mainwindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -17,11 +18,15 @@ public:
     ~MainWindow();  // 소멸자
 
 private slots:
-    void saveVersionToXml();  // Save 버튼 클릭 시 호출되는 함수
-    void updateInstallPath();  // 프로그램 이름이나 버전 변경 시 설치 경로 자동 업데이트
+    void updateInstallPath();            // 프로그램 이름이나 버전 변경 시 설치 경로 자동 업데이트
+    void saveVersionToXml();             // Save 버튼 클릭 시 XML 파일과 디렉터리 구조 생성
+    void selectFile();                   // 파일 선택 버튼 클릭 시 파일 선택
+    void compressSelectedFile();         // 압축 버튼 클릭 시 파일 압축
 
 private:
-    Ui::MainWindow *ui;  // UI 객체
+    Ui::MainWindow *ui;                  // UI 객체
+    InstallerFileManager *fileManager;   // 파일 관리 객체
+    QString selectedFilePath;            // 선택한 파일 경로 저장
 };
 
 #endif // MAINWINDOW_H

@@ -3,6 +3,11 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QDate>
+#include <QProcess>
+#include <QDebug>
+#include <QCoreApplication>
+
+
 
 InstallerFileManager::InstallerFileManager(const QString& programName, const QString& version, const QString& installPath)
     : programName(programName), version(version), installPath(installPath)
@@ -147,3 +152,41 @@ bool InstallerFileManager::saveXmlToFile(const QDomDocument& doc, const QString&
     file.close();
     return true;
 }
+
+// 파일을 7z로 압축하는 함수
+bool InstallerFileManager::compressFileToZip(const QString& folderPath) {
+    // 실행 파일이 위치한 디렉토리에 임시 압축 파일 생성
+    QString exeDir = QCoreApplication::applicationDirPath();
+    QString tempArchivePath = exeDir + "/" + QFileInfo(folderPath).fileName() + ".zip";
+
+    // 기존의 압축 파일이 존재하면 삭제
+    QFile::remove(tempArchivePath);
+
+    QProcess process;
+    QStringList arguments;
+    arguments << "-Command"
+              << QString("Compress-Archive -Path '%1' -DestinationPath '%2' -Force")
+                     .arg(QDir::toNativeSeparators(folderPath), QDir::toNativeSeparators(tempArchivePath));
+
+    process.start("powershell", arguments);
+
+    if (!process.waitForStarted()) {
+        QMessageBox::warning(nullptr, "Error", "Failed to start PowerShell process.");
+        return false;
+    }
+
+    process.waitForFinished();
+
+    QString output = process.readAllStandardOutput();
+    QString errorOutput = process.readAllStandardError();
+
+    if (process.exitCode() != 0) {
+        QMessageBox::warning(nullptr, "Compression Error", "Failed to compress folder:\n" + errorOutput);
+        return false;
+    }
+
+    QMessageBox::information(nullptr, "Success", "Folder compressed successfully to " + tempArchivePath + "\n\nOutput:\n" + output);
+    return true;
+}
+
+
