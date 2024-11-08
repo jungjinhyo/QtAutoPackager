@@ -69,7 +69,7 @@ bool InstallerFileManager::createConfigXml() {
 
     QDomElement repositories = doc.createElement("RemoteRepositories");
     QDomElement repository = doc.createElement("Repository");
-    repository.appendChild(createElement(doc, "Url", QString("https://jungjinhyo.github.io/%1-installer/v%2").arg(modifiedProgramName.toLower()).arg(version)));
+    repository.appendChild(createElement(doc, "Url", QString("https://jungjinhyo.github.io/%1-installer/v%2/repository").arg(modifiedProgramName.toLower()).arg(version)));
     repository.appendChild(createElement(doc, "Enabled", "1"));
     repository.appendChild(createElement(doc, "DisplayName", programName + " v" + version + " Repository"));
     repositories.appendChild(repository);
@@ -97,11 +97,11 @@ bool InstallerFileManager::createPackageXml() {
     licenses.appendChild(license);
     root.appendChild(licenses);
 
-    root.appendChild(createElement(doc, "DownloadableArchives", programName + "_v" + version + ".7z"));
+    root.appendChild(createElement(doc, "DownloadableArchives", programName + "_v" + version + ".zip"));
     root.appendChild(createElement(doc, "UpdateText", "This release includes bug fixes and new features."));
     root.appendChild(createElement(doc, "Default", "true"));
-    root.appendChild(createElement(doc, "ForcedInstallation", "false"));
-    root.appendChild(createElement(doc, "ForcedUpdate", "false"));
+    root.appendChild(createElement(doc, "ForcedInstallation", "true"));
+    root.appendChild(createElement(doc, "ForcedUpdate", "true"));
 
     return saveXmlToFile(doc, installPath + "/packages/com.mycompany." + programName.toLower().replace(" ", "") + "/meta/package.xml");
 }
@@ -153,7 +153,7 @@ bool InstallerFileManager::saveXmlToFile(const QDomDocument& doc, const QString&
     return true;
 }
 
-// 파일을 7z로 압축하는 함수
+// 파일을 zip로 압축하는 함수
 bool InstallerFileManager::compressFileToZip(const QString& folderPath) {
     // 실행 파일이 위치한 디렉토리에 임시 압축 파일 생성
     QString exeDir = QCoreApplication::applicationDirPath();
@@ -164,9 +164,21 @@ bool InstallerFileManager::compressFileToZip(const QString& folderPath) {
 
     QProcess process;
     QStringList arguments;
+
+    // 폴더 내 파일을 모두 포함시키되, 최상위 폴더는 제외하고 하위 파일들만 포함하도록 설정
+    QStringList filePaths;
+    QDir dir(folderPath);
+    dir.setFilter(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);  // 숨김 파일 제외, 파일과 폴더만
+    QFileInfoList files = dir.entryInfoList();
+    for (const QFileInfo& fileInfo : files) {
+        filePaths << fileInfo.absoluteFilePath();
+    }
+
+    // 압축 명령어에 폴더 내 파일들을 포함
     arguments << "-Command"
               << QString("Compress-Archive -Path '%1' -DestinationPath '%2' -Force")
-                     .arg(QDir::toNativeSeparators(folderPath), QDir::toNativeSeparators(tempArchivePath));
+                     .arg(filePaths.join("','"))  // 파일 경로들 연결
+                     .arg(QDir::toNativeSeparators(tempArchivePath));
 
     process.start("powershell", arguments);
 
@@ -187,5 +199,6 @@ bool InstallerFileManager::compressFileToZip(const QString& folderPath) {
     QMessageBox::information(nullptr, "Success", "Folder compressed successfully to " + tempArchivePath);
     return true;
 }
+
 
 
