@@ -10,11 +10,13 @@ CONFIG += c++17
 
 SOURCES += \
     InstallerFileManager.cpp \
+    QtInstallerCreator.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     InstallerFileManager.h \
+    QtInstallerCreator.h \
     mainwindow.h
 
 FORMS += \

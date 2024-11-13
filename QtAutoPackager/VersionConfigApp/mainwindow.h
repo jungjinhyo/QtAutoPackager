@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "installerfilemanager.h"
 #include "ui_mainwindow.h"
+#include "QtInstallerCreator.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -23,6 +24,7 @@ private slots:
     void handleSaveButtonClick();        // compressSelectedFile, saveVersionToXml 함수 실행
     void compressSelectedFile();         // 압축 버튼 클릭 시 파일 압축
     void saveVersionToXml();             // Save 버튼 클릭 시 XML 파일과 디렉터리 구조 생성
+    void createInstaller();              // QtInstallerCreator를 사용하여 설치 파일 생성
 
 private:
     Ui::MainWindow *ui;                  // UI 객체

@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "installerfilemanager.h"
+#include "QtInstallerCreator.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QProcess>
@@ -35,6 +36,8 @@ void MainWindow::handleSaveButtonClick() {
     compressSelectedFile();
     // XML 저장 함수 호출
     saveVersionToXml();
+    // QtInstallerCreator를 사용하여 설치 파일 생성
+    createInstaller();
 }
 
 // 프로그램 이름이나 버전이 변경될 때 설치 경로를 자동으로 업데이트하는 함수
@@ -103,6 +106,27 @@ void MainWindow::compressSelectedFile() {
     } else {
         ui->resultLabel->setText("Folder compression failed.");
     }
+}
+
+// 설치 파일 생성 함수
+void MainWindow::createInstaller() {
+    QString programName = ui->programNameInput->text();
+    QString version = ui->versionInput->text();
+    QString installPath = ui->installPathInput->text();
+
+    QtInstallerCreator installerCreator(programName, version, installPath);
+
+    if (!installerCreator.generateRepository()) {
+        ui->resultLabel->setText("Failed to generate repository.");
+        return;
+    }
+
+    if (!installerCreator.createInstallerExecutable()) {
+        ui->resultLabel->setText("Failed to create installer executable.");
+        return;
+    }
+
+    ui->resultLabel->setText("Installer executable created successfully!");
 }
 
 

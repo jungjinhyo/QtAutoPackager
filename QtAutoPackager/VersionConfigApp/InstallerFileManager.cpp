@@ -12,7 +12,7 @@
 InstallerFileManager::InstallerFileManager(const QString& programName, const QString& version, const QString& installPath)
     : programName(programName), version(version), installPath(installPath)
 {
-}
+
 
 // 디렉터리 구조 생성
 bool InstallerFileManager::createDirectoryStructure() {
