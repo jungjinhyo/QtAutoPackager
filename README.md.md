@@ -20,6 +20,7 @@ AWS S3 업로드를 위해 필요한 `boto3` 라이브러리를 설치합니다.
 pip install boto3
 ```
 
+## 3. `key/aws_credentials.txt`가 경로에 없으면 따로 받아서 저장하기.
 ---
 
 # 프로젝트 구조 및 파일 설명
