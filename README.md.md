@@ -84,13 +84,15 @@ pip install boto3
 
 ## 사용 방법
 
-### 1. 설치 파일 생성
+### 1. QtAutoPackager/VersionConfigApp/release/VersionConfigApp.exe를 실행한다.
+
+### 2. 설치 파일 생성
 
 1. 프로그램 이름과 버전, 설치 경로를 입력합니다.
 2. **Save** 버튼을 클릭하여 디렉터리 구조와 필요한 XML 파일을 생성합니다.
 3. XML 생성 후 설치 파일이 자동으로 생성됩니다. 결과는 지정한 `installPath`에 저장됩니다.
 
-### 2. S3 업로드
+### 3. S3 업로드
 
 1. **bucketName**을 입력합니다. S3에 올라간 버킷 이름과 다를 경우 업로드되지 않습니다.
 2. **S3 Upload** 버튼을 클릭하여 `installPath` 경로에 생성된 설치 파일을 S3에 업로드합니다.
