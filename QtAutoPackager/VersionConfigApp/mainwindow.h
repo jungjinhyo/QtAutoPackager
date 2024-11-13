@@ -25,6 +25,7 @@ private slots:
     void compressSelectedFile();         // 압축 버튼 클릭 시 파일 압축
     void saveVersionToXml();             // Save 버튼 클릭 시 XML 파일과 디렉터리 구조 생성
     void createInstaller();              // QtInstallerCreator를 사용하여 설치 파일 생성
+    void handleS3UploadButtonClick();    // S3 업로드 버튼 클릭 시 호출
 
 private:
     Ui::MainWindow *ui;                  // UI 객체

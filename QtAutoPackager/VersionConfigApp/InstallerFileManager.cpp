@@ -10,8 +10,7 @@
 
 
 InstallerFileManager::InstallerFileManager(const QString& programName, const QString& version, const QString& installPath)
-    : programName(programName), version(version), installPath(installPath)
-{
+    : programName(programName), version(version), installPath(installPath){}
 
 
 // 디렉터리 구조 생성
@@ -56,7 +55,7 @@ bool InstallerFileManager::createConfigXml() {
     root.appendChild(createElement(doc, "Version", version));
     root.appendChild(createElement(doc, "Title", programName + " Installer"));
     root.appendChild(createElement(doc, "Publisher", "MyCompany"));
-    root.appendChild(createElement(doc, "ProductUrl", "https://jungjinhyo.github.io/" + modifiedProgramName.toLower() + "-installer/"));
+    // root.appendChild(createElement(doc, "ProductUrl", "https://jungjinhyo.github.io/" + modifiedProgramName.toLower() + "-installer/"));     //설치 중 설명서가 필요할 경우 추가
     root.appendChild(createElement(doc, "InstallerWindowIcon", "installericon.png"));
     root.appendChild(createElement(doc, "InstallerApplicationIcon", "installericon.png"));
     root.appendChild(createElement(doc, "Logo", "logo.png"));
@@ -67,13 +66,13 @@ bool InstallerFileManager::createConfigXml() {
     root.appendChild(createElement(doc, "TargetDir", QString("@DesktopDir@/%1_v%2").arg(programName).arg(version)));
     root.appendChild(createElement(doc, "AdminTargetDir", "@RootDir@/" + programName));
 
-    QDomElement repositories = doc.createElement("RemoteRepositories");
-    QDomElement repository = doc.createElement("Repository");
-    repository.appendChild(createElement(doc, "Url", QString("https://jungjinhyo.github.io/%1-installer/v%2/repository").arg(modifiedProgramName.toLower()).arg(version)));
-    repository.appendChild(createElement(doc, "Enabled", "1"));
-    repository.appendChild(createElement(doc, "DisplayName", programName + " v" + version + " Repository"));
-    repositories.appendChild(repository);
-    root.appendChild(repositories);
+    // QDomElement repositories = doc.createElement("RemoteRepositories");      //원격 저장소 온라인 설치가 필요할 경우 추가 ->repogen 명령어도 바꿔야함
+    // QDomElement repository = doc.createElement("Repository");
+    // repository.appendChild(createElement(doc, "Url", QString("https://jungjinhyo.github.io/%1-installer/v%2/repository").arg(modifiedProgramName.toLower()).arg(version)));
+    // repository.appendChild(createElement(doc, "Enabled", "1"));
+    // repository.appendChild(createElement(doc, "DisplayName", programName + " v" + version + " Repository"));
+    // repositories.appendChild(repository);
+    // root.appendChild(repositories);
 
     return saveXmlToFile(doc, installPath + "/config/config.xml");
 }

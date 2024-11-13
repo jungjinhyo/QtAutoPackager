@@ -9,17 +9,17 @@ QtInstallerCreator::QtInstallerCreator(const QString& programName, const QString
     : programName(programName), version(version), installPath(installPath)
 {
     repositoryPath = installPath + "/repository";
-    installerPath = installPath + "/" + programName + "_Installer_v" + version + ".exe";
+    installerPath = installPath + "/" + programName + "_Installer" + ".exe";
 }
 
 QString QtInstallerCreator::getRepogenPath() const {
-    // repogen 실행 파일의 경로를 반환합니다 (환경에 맞게 수정 필요)
-    return "C:/Qt/Tools/QtInstallerFramework/4.8/bin/repogen.exe";
+    QString repogenPath = QDir(QCoreApplication::applicationDirPath()).filePath("../bin/repogen.exe");
+    return repogenPath;
 }
 
 QString QtInstallerCreator::getBinarycreatorPath() const {
-    // binarycreator 실행 파일의 경로를 반환합니다 (환경에 맞게 수정 필요)
-    return "C:/Qt/Tools/QtInstallerFramework/4.8/bin/binarycreator.exe";
+    QString binarycreatorPath = QDir(QCoreApplication::applicationDirPath()).filePath("../bin/binarycreator.exe");
+    return binarycreatorPath;
 }
 
 bool QtInstallerCreator::generateRepository() {
@@ -29,7 +29,7 @@ bool QtInstallerCreator::generateRepository() {
     QString configPath = installPath + "/config/config.xml";
     QString packagesPath = installPath + "/packages";
 
-    arguments << "-p" << packagesPath << "-c" << configPath << repositoryPath;
+    arguments << "--update" << "-p" << packagesPath << repositoryPath;
 
     process.start(getRepogenPath(), arguments);
 
@@ -42,7 +42,7 @@ bool QtInstallerCreator::generateRepository() {
 
     QString errorOutput = process.readAllStandardError();
     if (process.exitCode() != 0) {
-        QMessageBox::warning(nullptr, "Repository Generation Error", "Failed to generate repository:\n" + errorOutput);
+        QMessageBox::warning(nullptr, "Repository Generation Error", "Failed to generate repository:\n");
         return false;
     }
 
@@ -55,7 +55,7 @@ bool QtInstallerCreator::createInstallerExecutable() {
     QStringList arguments;
 
     QString configPath = installPath + "/config/config.xml";
-    arguments << "-c" << configPath << "-p" << installPath + "/packages" << "-r" << repositoryPath << installerPath;
+    arguments << "-c" << configPath << "-p" << installPath + "/packages" << installerPath;
 
     process.start(getBinarycreatorPath(), arguments);
 

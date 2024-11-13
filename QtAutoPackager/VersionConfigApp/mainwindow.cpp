@@ -12,6 +12,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);  // UI 설정
 
+    // bucketNameLabel의 기본값을 "GCS"로 설정
+    ui->bucketNameLabel->setText("GCS");
+
     // Save 버튼 클릭 시 compressSelectedFile 함수 호출 연결 compressSelectedFile, saveVersionToXml 함수 호출 연결
     connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::handleSaveButtonClick);
 
@@ -24,6 +27,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 초기 설치 경로 업데이트
     updateInstallPath();
+
+    //S3에 installer.exe파일 업로드
+    connect(ui->s3UploadButton, &QPushButton::clicked, this, &MainWindow::handleS3UploadButtonClick);
 }
 
 MainWindow::~MainWindow()
@@ -129,4 +135,39 @@ void MainWindow::createInstaller() {
     ui->resultLabel->setText("Installer executable created successfully!");
 }
 
+//S3 Upload 버튼을 누르면 installer를 S3에 업로드
+void MainWindow::handleS3UploadButtonClick() {
+    QString programName = ui->programNameInput->text();
+    QString version = ui->versionInput->text();
+    QString installPath = ui->installPathInput->text();
+    QString pythonScriptPath = QDir(QCoreApplication::applicationDirPath()).filePath("../upload_to_s3.py");
+    QString filePath = installPath + "/" + programName + "_Installer.exe";
+    // bucketName을 UI에서 가져오고, 비어 있는 경우 "GCS"로 설정
+    QString bucketName = ui->bucketNameLabel->text().isEmpty() ? "GCS" : ui->bucketNameLabel->text();
+    QString objectKey = "v" + version + "/" + programName + "_Installer.exe";
 
+    QProcess process;
+    process.start("python", QStringList() << pythonScriptPath << filePath << bucketName << objectKey);
+
+    if (!process.waitForStarted()) {
+        QMessageBox::warning(this, "Error", "Failed to start Python process for S3 upload.");
+        return;
+    }
+
+    process.waitForFinished();
+    QString output = process.readAllStandardOutput();
+    QString errorOutput = process.readAllStandardError();
+
+    // 업로드 성공 여부를 output에서 확인하고, 실패 시 errorOutput을 포함하여 경고 표시
+    if (!output.contains("Upload successful")) {
+        QString errorMsg = "Failed to upload file to S3.";
+        if (!errorOutput.isEmpty()) {
+            errorMsg += "\n" + errorOutput;
+        } else if (!output.isEmpty()) {
+            errorMsg += "\n" + output;
+        }
+        QMessageBox::warning(this, "S3 Upload Error", errorMsg);
+    } else {
+        QMessageBox::information(this, "S3 Upload", "File uploaded successfully to S3.");
+    }
+}

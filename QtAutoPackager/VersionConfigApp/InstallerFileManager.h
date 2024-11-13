@@ -17,7 +17,7 @@ public:
     bool createConfigXml();                // config.xml 생성
     bool createPackageXml();               // package.xml 생성
     bool createLicenseFile();              // license.txt 생성
-    bool compressFileToZip(const QString& filePath); // 파일을 zip로 압축
+    bool compressFileToZip(const QString& folderPath); // 폴더를 zip로 압축
 
 private:
     QString programName;
